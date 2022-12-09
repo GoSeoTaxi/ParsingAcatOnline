@@ -1,32 +1,27 @@
 package libs
 
 import (
-	"ParsingAcatOnline/internal/ChangeData"
-	"ParsingAcatOnline/internal/constData"
 	"bytes"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/MakeConfiger"
+
+	"context"
 	"fmt"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/ChangeData"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/constData"
 	"github.com/PuerkitoBio/goquery"
-	"io/ioutil"
+	"github.com/chromedp/chromedp"
 	"log"
-	"net/http"
 	"time"
 )
 
 type URLInputGet struct {
-	URLIn string
+	URLIn  string
+	Config *MakeConfiger.Config
 }
 
 func (s URLInputGet) Geter() (doc *goquery.Document) {
 
-	body := getReq(s.URLIn)
-	/*	res, err := http.Get(s.URLIn)
-		if err != nil {
-			fmt.Println(s.URLIn)
-			fmt.Println(err)
-			fmt.Println(`Не считали данные`)
-			return doc
-		}
-		defer res.Body.Close()*/
+	body := getReq(s.URLIn, s.Config)
 
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	if err != nil {
@@ -36,9 +31,11 @@ func (s URLInputGet) Geter() (doc *goquery.Document) {
 	return doc
 }
 
-func getReq(sURL string) (body []byte) {
+func getReq(sURL string, cfg *MakeConfiger.Config) (body []byte) {
 	time.Sleep(constData.TimeOutRequest * time.Second)
 	sURL = ChangeData.Replacer(sURL)
+
+	var res string
 
 	for rep := 0; rep < constData.ReplyGetRequest; rep++ {
 
@@ -46,39 +43,85 @@ func getReq(sURL string) (body []byte) {
 			fmt.Printf("Ошибка сети. Запуск цил повтора. Попытка номер - %v \nURL - %v \n", rep, sURL)
 		}
 
-		req, err := http.NewRequest("GET", sURL, nil)
-		if err != nil {
-			fmt.Println(err)
-			fmt.Println(`Не Создали запрос`)
-			time.Sleep(constData.ReplyGetRequestTimeOut * time.Second)
-			continue
-		}
+		var err1 error
+		func() {
 
-		req.Header.Set("User-Agent", constData.UserAgert)
-		req.Header.Set("Cache-Control", "no-cache")
+			opts := append(chromedp.DefaultExecAllocatorOptions[:],
+				chromedp.Flag("headless", cfg.Debug),
+				chromedp.Flag("disable-gpu", false),
+				chromedp.Flag("enable-automation", false),
+				chromedp.Flag("disable-extensions", true),
+			)
+
+			allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+			defer cancel()
+
+			// create context
+			ctx, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(log.Printf))
+			defer cancel()
+
+			// run task list
+
+			err := chromedp.Run(ctx,
+				/*	chromedp.Navigate(sURL),
+					chromedp.WaitReady(`#oemwidget_oem_catalog`),
+					chromedp.Sleep(5*time.Second),
+					chromedp.Outp
+				*/
+				scrapIt(sURL, &res),
+			)
+			if err != nil {
+				err1 = err
+			}
+
+		}()
 
 		fmt.Println(`*`)
-
-		client := &http.Client{Timeout: (time.Second * constData.TimeOutRequestGeter)}
-		res, err := client.Do(req)
-		if err != nil {
-			//	fmt.Println(sURL)
-			fmt.Println(err)
-			fmt.Println(`Не считали данные`)
-			time.Sleep(constData.ReplyGetRequestTimeOut * time.Second)
+		if err1 != nil {
 			continue
 		}
 
-		body, err = ioutil.ReadAll(res.Body)
-		if err != nil {
-			fmt.Println(`Error reading body. `)
-			fmt.Println(err)
-			time.Sleep(constData.ReplyGetRequestTimeOut * time.Second)
-			res.Body.Close()
-			continue
-		}
-		res.Body.Close()
+		body = []byte(res)
 		break
+		//Правим тут
+
+		/*
+			req, err := http.NewRequest("GET", sURL, nil)
+			if err != nil {
+				fmt.Println(err)
+				fmt.Println(`Не Создали запрос`)
+				time.Sleep(constData.ReplyGetRequestTimeOut * time.Second)
+				continue
+			}
+
+			req.Header.Set("User-Agent", constData.UserAgert)
+			req.Header.Set("Cache-Control", "no-cache")
+		*/
+
+		/*
+			client := &http.Client{Timeout: (time.Second * constData.TimeOutRequestGeter)}
+			res, err := client.Do(req)
+			if err != nil {
+				//	fmt.Println(sURL)
+				fmt.Println(err)
+				fmt.Println(`Не считали данные`)
+				time.Sleep(constData.ReplyGetRequestTimeOut * time.Second)
+				continue
+			}
+
+			body, err = ioutil.ReadAll(res.Body)
+			if err != nil {
+				fmt.Println(`Error reading body. `)
+				fmt.Println(err)
+				time.Sleep(constData.ReplyGetRequestTimeOut * time.Second)
+				res.Body.Close()
+				continue
+			}
+			res.Body.Close()
+			break
+
+		*/
 	}
+
 	return body
 }

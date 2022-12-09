@@ -1,10 +1,10 @@
 package writeOutFiles
 
 import (
-	"ParsingAcatOnline/internal/constData"
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/constData"
 	"io/ioutil"
 	"log"
 	"os"
@@ -47,7 +47,7 @@ func writeLines(lines []string, time string, path string) error {
 
 	w := bufio.NewWriter(file)
 	for _, line := range lines {
-		fmt.Fprintln(w, line /*time+constData.Separator+*/)
+		fmt.Fprintln(w, line)
 	}
 	return w.Flush()
 }
