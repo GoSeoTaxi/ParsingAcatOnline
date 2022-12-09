@@ -1,20 +1,22 @@
 package main
 
 import (
-	"ParsingAcatOnline/constData"
-	"ParsingAcatOnline/internal/endApp"
-	"ParsingAcatOnline/internal/initApp"
-	"ParsingAcatOnline/internal/makeListUrl"
-	"bufio"
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/MakeConfiger"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/constData"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/endApp"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/initApp"
+	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/makeListUrl"
 	"log"
-	"os"
 	"time"
 )
 
 func main() {
+
+	cfg, err := MakeConfiger.InitConfig()
+	if err != nil {
+		log.Fatalf("can't load config: %v", err)
+	}
 
 	fmt.Println(`Запуск`)
 	time.Sleep(constData.TimeSleepStart * time.Second)
@@ -23,59 +25,12 @@ func main() {
 		endApp.Fin()
 	}
 
-	StartingParsint(records)
+	StartingParsint(records, cfg)
 	endApp.Fin()
 }
 
-func StartingParsint(lines [][]string) {
+func StartingParsint(lines [][]string, cfg *MakeConfiger.Config) {
 	for value := range lines {
-		makeListUrl.MakeList(lines[value])
+		makeListUrl.MakeList(lines[value], cfg)
 	}
-}
-
-func ReadLines(path string) (lines []string) {
-
-	var abcd []byte
-	lineFiles, err := os.Stat(path)
-	if errors.Is(err, os.ErrNotExist) || lineFiles.Size() == 0 {
-		ioutil.WriteFile(path, abcd, 0644)
-		log.Fatal(`Пустой файл с задачами`)
-	}
-
-	file, err := os.OpenFile(path, os.O_RDWR, 0666)
-	if err != nil {
-		if os.IsPermission(err) {
-			log.Println("Error: Write permission denied.")
-			log.Fatal(err)
-		}
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	return lines
-
-}
-
-func WriteLines(path string, lines []string) error {
-
-	file, err := os.OpenFile(path, os.O_CREATE, 0666)
-	if err != nil {
-		if os.IsPermission(err) {
-			log.Println("Error: Write permission denied.")
-			return err
-		}
-	}
-	defer file.Close()
-
-	w := bufio.NewWriter(file)
-	for _, line := range lines {
-		if line != "" {
-			fmt.Fprintln(w, line)
-		}
-	}
-	return w.Flush()
-
 }
