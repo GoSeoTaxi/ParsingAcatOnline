@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func scrapIt(url string, str *string) chromedp.Tasks {
+func ScrapIt(url string, str *string) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.Navigate(url),
 		chromedp.Sleep(2 * time.Second),

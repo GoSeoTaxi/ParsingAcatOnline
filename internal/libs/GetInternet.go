@@ -21,7 +21,12 @@ type URLInputGet struct {
 
 func (s URLInputGet) Geter() (doc *goquery.Document) {
 
-	body := getReq(s.URLIn, s.Config)
+	s.Config.URLReq <- s.URLIn
+
+	//вот тут мы должны вернуть массив байт
+	//	body := getReq(s.URLIn, s.Config)
+
+	body := <-s.Config.DataOUTReq
 
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	if err != nil {
@@ -47,6 +52,7 @@ func getReq(sURL string, cfg *MakeConfiger.Config) (body []byte) {
 		func() {
 
 			opts := append(chromedp.DefaultExecAllocatorOptions[:],
+				chromedp.UserDataDir("C:\\temp\\asat_temp"),
 				chromedp.Flag("headless", cfg.Debug),
 				chromedp.Flag("disable-gpu", false),
 				chromedp.Flag("enable-automation", false),
@@ -62,19 +68,22 @@ func getReq(sURL string, cfg *MakeConfiger.Config) (body []byte) {
 
 			// run task list
 
-			err := chromedp.Run(ctx,
-				/*	chromedp.Navigate(sURL),
-					chromedp.WaitReady(`#oemwidget_oem_catalog`),
-					chromedp.Sleep(5*time.Second),
-					chromedp.Outp
-				*/
-				scrapIt(sURL, &res),
-			)
+			err := chromedp.Run(ctx) /*	chromedp.Navigate(sURL),
+				chromedp.WaitReady(`#oemwidget_oem_catalog`),
+				chromedp.Sleep(5*time.Second),
+				chromedp.Outp
+			*/
+
+			//	scrapIt(sURL, &res),
+
 			if err != nil {
 				err1 = err
 			}
 
 		}()
+
+		fmt.Println(`++`)
+		time.Sleep(10 * time.Second)
 
 		fmt.Println(`*`)
 		if err1 != nil {
@@ -124,4 +133,9 @@ func getReq(sURL string, cfg *MakeConfiger.Config) (body []byte) {
 	}
 
 	return body
+}
+
+func scrapRun() (body []byte) {
+
+	return
 }

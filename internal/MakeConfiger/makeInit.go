@@ -6,7 +6,9 @@ import (
 )
 
 type Config struct {
-	Debug bool `env:"BONUS_APP_SERVER_DEBUG"`
+	Debug      bool `env:"BONUS_APP_SERVER_DEBUG"`
+	URLReq     chan string
+	DataOUTReq chan []byte
 }
 
 // InitConfig initialises config, first from flags, then from env, so that env overwrites flags
@@ -17,6 +19,9 @@ func InitConfig() (*Config, error) {
 	flag.Parse()
 
 	err := env.Parse(&cfg)
+
+	cfg.URLReq = make(chan string)
+	cfg.DataOUTReq = make(chan []byte)
 
 	if err != nil {
 		return nil, err

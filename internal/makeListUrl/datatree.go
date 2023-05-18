@@ -1,11 +1,14 @@
 package makeListUrl
 
 import (
+	"fmt"
 	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/ChangeData"
 	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/MakeConfiger"
 	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/libs"
 	"github.com/GoSeoTaxi/ParsingAcatOnline/internal/scraping"
 	"github.com/PuerkitoBio/goquery"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -23,11 +26,28 @@ func dataTree(sURL string, textI string, cfg *MakeConfiger.Config) {
 		s.Find("span.fiat_unit").Each(func(i2 int, l1 *goquery.Selection) {
 			urlOut, _ := l1.Parent().Attr("href")
 			text := textI + " | " + l1.Text()
-			URLRequestItem1 := sURL + "/." + ChangeData.Replacer(urlOut)
-			//		fmt.Println(URLRequestItem1 + " | " + text)
+
+			var URLRequestItem1 string
+
+			str2 := "ea.acat.online/catalogs/"
+			if strings.Contains(sURL, str2) {
+				URLRequestItem1 = sURL + "/." + ChangeData.Replacer(urlOut)
+				//		fmt.Println(URLRequestItem1 + " | " + text)
+			} else {
+				// Разбираем URL
+				u, err := url.Parse(sURL)
+				if err != nil {
+					panic(err)
+				}
+
+				// Получаем адрес домена и протокол подключения
+				domain := fmt.Sprintf("%s://%s", u.Scheme, u.Hostname())
+
+				URLRequestItem1 = domain + ChangeData.Replacer(urlOut)
+			}
 
 			dataTree(URLRequestItem1, text, cfg)
-
+			URLRequestItem1 = ""
 			//		time.Sleep(5 * time.Second)
 
 		})
