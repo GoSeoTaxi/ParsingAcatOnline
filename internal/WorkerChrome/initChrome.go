@@ -30,10 +30,9 @@ func InitChrome(cfg *MakeConfiger.Config) {
 	defer cancel()
 
 	ctx, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(log.Printf))
-	defer cancel()
 
 	err := chromedp.Run(ctx,
-		chromedp.Navigate("https://ya.ru"),
+		chromedp.Navigate("about:blank"),
 		chromedp.Sleep(2*time.Second),
 	)
 	if err != nil {
@@ -54,29 +53,52 @@ func InitChrome(cfg *MakeConfiger.Config) {
 			if errors.Is(err, context.Canceled) {
 				fmt.Println(sURL)
 				log.Fatal("Произошла не предвиденная ошибка. Последняя страница с ошибкой")
-
-				//22
-
-				//var err1 error
-
-				//11
-				time.Sleep(10 * time.Second)
 			}
 		}
 
 		// Проверяем наличие подстроки "Робота" в строке
 		if strings.Contains(res, constData.SearchRobot) {
+
+			if strings.Contains(res, "Подтверждаю") {
+				fmt.Println("Пробуем пройти капчу")
+				time.Sleep(2 * time.Second)
+				err = chromedp.Run(ctx,
+					chromedp.Navigate(sURL),
+					chromedp.Sleep(5*time.Second),
+					chromedp.Click(`div.d-flex`),
+				)
+				time.Sleep(2 * time.Second)
+				fmt.Println("попробовали")
+
+				if _ = chromedp.Run(ctx, libs.ScrapIt(sURL, &res)); strings.Contains(res, constData.SearchRobot) {
+					goto needMan
+				} else {
+					goto scrap
+				}
+
+			}
+
+		needMan:
 			fmt.Println("Когда прошли капчу - Нажмите Enter")
 			fmt.Scanln()
 			goto scrap
 		}
+		/*
+			// Проверяем наличие подстроки "Робота" в строке
+			if strings.Contains(res, constData.SearchRobot) {
+
+				fmt.Println("Когда прошли капчу - Нажмите Enter")
+				fmt.Scanln()
+				goto scrap
+			}
+		*/
 		if !strings.Contains(res, "acat.online") {
 			goto scrap
 		}
 
 		cfg.DataOUTReq <- []byte(res)
 
-		fmt.Println(`Открыли страницу`)
+		log.Println(`Открыли страницу`)
 	}
 
 }

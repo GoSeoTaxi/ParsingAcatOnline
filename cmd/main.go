@@ -16,7 +16,7 @@ func main() {
 
 	go func() {
 		for {
-			time.Sleep(60 * time.Second)
+			time.Sleep(300 * time.Second)
 			log.Println(` - Я работаю, наверное.`)
 		}
 	}()
