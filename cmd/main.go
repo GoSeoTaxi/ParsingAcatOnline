@@ -14,22 +14,36 @@ import (
 
 func main() {
 
-	go func() {
-		for {
-			time.Sleep(300 * time.Second)
-			log.Println(` - Я работаю, наверное.`)
-		}
-	}()
-
 	cfg, err := MakeConfiger.InitConfig()
 	if err != nil {
 		log.Fatalf("can't load config: %v", err)
 	}
 
+	go func(cfg *MakeConfiger.Config) {
+		fmt.Println(`Запуск`)
+	mainFor:
+		for {
+
+			for i := 1; i <= 300; i++ {
+
+				switch {
+				case cfg.Exit:
+					break mainFor
+				case i == 300:
+					log.Println(` - Я работаю, наверное...`)
+					fallthrough
+				default:
+					time.Sleep(1 * time.Second)
+				}
+
+			}
+
+		}
+	}(cfg)
+
 	//Инициализация хрома
 	go WorkerChrome.InitChrome(cfg)
 
-	fmt.Println(`Запуск`)
 	time.Sleep(constData.TimeSleepStart * time.Second)
 	records, err := initApp.ReadCsvFile(constData.InputCSV)
 	if err != nil {
