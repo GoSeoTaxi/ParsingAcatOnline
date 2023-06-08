@@ -93,6 +93,11 @@ func InitChrome(cfg *MakeConfiger.Config) {
 			}
 		}
 
+		if strings.Contains(res, "Internal Server Error") {
+			log.Println("На странице " + sURL + " БД не содержит данных")
+			goto EndPoint
+		}
+
 		if strings.Contains(res, "Доступ к каталогу заблокирован") || strings.Contains(res, "Страница не найдена") {
 			log.Println(valueURL + " Был удалён из очереди - ЗАБЛОКИРОВАН")
 			delete(cfg.ListUrl, keyURL)
@@ -141,6 +146,7 @@ func InitChrome(cfg *MakeConfiger.Config) {
 			goto scrap
 		}
 
+	EndPoint:
 		cfg.DataOUTReq <- []byte(res)
 
 		log.Println(`Открыли страницу`)
