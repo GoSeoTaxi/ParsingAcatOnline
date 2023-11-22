@@ -9,3 +9,7 @@ const InputURLFileTXT = "urls.txt"
 const WriterSucces = "Записали данные"
 const ReplyGetRequest = 10
 const SearchRobot = "Пожалуйста, подтвердите, что вы не робот"
+
+const TimeOutStartCaptcha = 1
+const TimeOutStopCaptcha = 3
+const CounterTryCounter = 3

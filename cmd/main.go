@@ -30,7 +30,9 @@ func main() {
 				case cfg.Exit:
 					break mainFor
 				case i == 300:
-					log.Println(` - Я работаю, наверное...`)
+					if !cfg.Pause {
+						log.Println(` - Я работаю, наверное...`)
+					}
 					fallthrough
 				default:
 					time.Sleep(1 * time.Second)
@@ -51,6 +53,8 @@ func main() {
 	}
 
 	StartingParsint(records, cfg)
+
+	cfg.Pause = true
 	endApp.Fin()
 }
 

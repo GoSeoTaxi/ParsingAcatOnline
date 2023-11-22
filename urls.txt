@@ -21,7 +21,6 @@ virag.acat.online
 avtokrepeg.acat.online
 bigsto.acat.online
 siauto.acat.online
-interauto.acat.online
 alexauto.acat.online
 inter-autoshop.acat.online
 shahs.acat.online

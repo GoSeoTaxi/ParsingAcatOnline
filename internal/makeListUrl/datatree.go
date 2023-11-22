@@ -41,9 +41,12 @@ func dataTree(sURL string, textI string, cfg *MakeConfiger.Config) {
 					}
 
 					// Получаем адрес домена и протокол подключения
-					//		domain := fmt.Sprintf("%s://%s", u.Scheme, u.Hostname())
+					//domain := fmt.Sprintf("%s://%s", u.Scheme, u.Hostname())
 				*/
-				URLRequestItem1 = sURL // domain + ChangeData.Replacer(urlOut)
+
+				// ВОТ ТУТ	URLRequestItem1 = sURL // domain + ChangeData.Replacer(urlOut)
+
+				URLRequestItem1 = sURL + "/." + ChangeData.Replacer(urlOut)
 
 			}
 

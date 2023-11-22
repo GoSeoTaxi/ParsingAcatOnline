@@ -7,11 +7,13 @@ import (
 )
 
 type Config struct {
-	Debug      bool `env:"BONUS_APP_SERVER_DEBUG"`
-	URLReq     chan string
-	DataOUTReq chan []byte
-	ListUrl    map[int]string
-	Exit       bool
+	Debug           bool `env:"BONUS_APP_SERVER_DEBUG"`
+	URLReq          chan string
+	DataOUTReq      chan []byte
+	ListUrl         map[int]string
+	ListUrlFromFile map[int]string
+	Exit            bool
+	Pause           bool
 }
 
 // InitConfig initialises config, first from flags, then from env, so that env overwrites flags
@@ -20,8 +22,9 @@ func InitConfig() (*Config, error) {
 	var cfg Config
 
 	cfg.ListUrl = make(map[int]string)
+	cfg.ListUrlFromFile = make(map[int]string)
 
-	initApp.LoadTOmapTXT(cfg.ListUrl)
+	initApp.LoadTOmapTXT(cfg.ListUrlFromFile)
 
 	flag.BoolVar(&cfg.Debug, "debug", true, "key for hash function")
 	flag.Parse()

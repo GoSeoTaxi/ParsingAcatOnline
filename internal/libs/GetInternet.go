@@ -52,11 +52,11 @@ func getReq(sURL string, cfg *MakeConfiger.Config) (body []byte) {
 		func() {
 
 			opts := append(chromedp.DefaultExecAllocatorOptions[:],
-				chromedp.UserDataDir("C:\\temp\\asat_temp"),
+				//	chromedp.UserDataDir("C:\\Users\\info\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 6"),
 				chromedp.Flag("headless", cfg.Debug),
 				chromedp.Flag("disable-gpu", false),
 				chromedp.Flag("enable-automation", false),
-				chromedp.Flag("disable-extensions", true),
+				//	chromedp.Flag("disable-extensions", true),
 			)
 
 			allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
